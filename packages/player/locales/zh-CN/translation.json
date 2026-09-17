@@ -115,6 +115,28 @@
 			}
 		}
 	},
+	"menu": {
+		"about": "关于 {appName}",
+		"closeWindow": "关闭窗口",
+		"copy": "拷贝",
+		"cut": "剪切",
+		"edit": "编辑",
+		"file": "文件",
+		"fullscreen": "切换全屏幕",
+		"help": "帮助",
+		"hide": "隐藏 {appName}",
+		"hideOthers": "隐藏其他",
+		"minimize": "最小化",
+		"paste": "粘贴",
+		"quit": "退出 {appName}",
+		"redo": "重做",
+		"selectAll": "全选",
+		"services": "服务",
+		"undo": "撤销",
+		"view": "显示",
+		"window": "窗口",
+		"zoom": "缩放"
+	},
 	"name": "",
 	"newPlaylist": {
 		"buttonLabel": "新建歌单",

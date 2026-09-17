@@ -115,6 +115,28 @@
 			}
 		}
 	},
+	"menu": {
+		"about": "Giới thiệu về {appName}",
+		"closeWindow": "Đóng cửa sổ",
+		"copy": "Sao chép",
+		"cut": "Cắt",
+		"edit": "Sửa",
+		"file": "Tệp",
+		"fullscreen": "Bật toàn màn hình",
+		"help": "Trợ giúp",
+		"hide": "Ẩn {appName}",
+		"hideOthers": "Ẩn các mục khác",
+		"minimize": "Thu nhỏ",
+		"paste": "Dán",
+		"quit": "Thoát {appName}",
+		"redo": "Làm lại",
+		"selectAll": "Chọn tất cả",
+		"services": "Dịch vụ",
+		"undo": "Hoàn tác",
+		"view": "Hiển thị",
+		"window": "Cửa sổ",
+		"zoom": "Thu phóng"
+	},
 	"name": "",
 	"newPlaylist": {
 		"buttonLabel": "Tạo danh sách phát mới.",

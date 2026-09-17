@@ -34,11 +34,10 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { loadedExtensionAtom } from "../../states/extensionsAtoms.ts";
+import { settingsPageAtom } from "../../states/settingsAtoms.ts";
 import { ExtensionTab } from "./extension.tsx";
 import styles from "./index.module.css";
 import { PlayerSettingsTab } from "./player.tsx";
-
-const currentPageAtom = atom("player.general");
 
 const loadedExtensionsWithSettingsAtom = atom((get) => {
 	const loadedExtensions = get(loadedExtensionAtom);
@@ -84,7 +83,7 @@ const SidebarContent: FC<{ onNavigate: (pageId: string) => void }> = ({
 	onNavigate,
 }) => {
 	const os = usePlatform();
-	const [currentPage] = useAtom(currentPageAtom);
+	const [currentPage] = useAtom(settingsPageAtom);
 	const loadedExtensions = useAtomValue(loadedExtensionsWithSettingsAtom);
 	const { t, i18n } = useTranslation();
 
@@ -183,7 +182,7 @@ const SidebarContent: FC<{ onNavigate: (pageId: string) => void }> = ({
 };
 
 export const Component: FC = () => {
-	const [currentPage, setCurrentPage] = useAtom(currentPageAtom);
+	const [currentPage, setCurrentPage] = useAtom(settingsPageAtom);
 	const loadedExtensions = useAtomValue(loadedExtensionsWithSettingsAtom);
 	const { t } = useTranslation();
 

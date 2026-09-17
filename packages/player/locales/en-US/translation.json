@@ -115,6 +115,28 @@
 			}
 		}
 	},
+	"menu": {
+		"about": "About {appName}",
+		"closeWindow": "Close Window",
+		"copy": "Copy",
+		"cut": "Cut",
+		"edit": "Edit",
+		"file": "File",
+		"fullscreen": "Toggle Full Screen",
+		"help": "Help",
+		"hide": "Hide {appName}",
+		"hideOthers": "Hide Others",
+		"minimize": "Minimize",
+		"paste": "Paste",
+		"quit": "Quit {appName}",
+		"redo": "Redo",
+		"selectAll": "Select All",
+		"services": "Services",
+		"undo": "Undo",
+		"view": "View",
+		"window": "Window",
+		"zoom": "Zoom"
+	},
 	"name": "",
 	"newPlaylist": {
 		"buttonLabel": "New Playlist",

@@ -115,6 +115,28 @@
 			}
 		}
 	},
+	"menu": {
+		"about": "{appName} について",
+		"closeWindow": "ウインドウを閉じる",
+		"copy": "コピー",
+		"cut": "カット",
+		"edit": "編集",
+		"file": "ファイル",
+		"fullscreen": "フルスクリーンにする",
+		"help": "ヘルプ",
+		"hide": "{appName} を隠す",
+		"hideOthers": "ほかを隠す",
+		"minimize": "しまう",
+		"paste": "ペースト",
+		"quit": "{appName} を終了",
+		"redo": "やり直す",
+		"selectAll": "すべてを選択",
+		"services": "サービス",
+		"undo": "取り消す",
+		"view": "表示",
+		"window": "ウインドウ",
+		"zoom": "拡大／縮小"
+	},
 	"name": "",
 	"newPlaylist": {
 		"buttonLabel": "新しいプレイリスト",

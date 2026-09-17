@@ -115,6 +115,28 @@
 			}
 		}
 	},
+	"menu": {
+		"about": "關於 {appName}",
+		"closeWindow": "關閉視窗",
+		"copy": "拷貝",
+		"cut": "剪下",
+		"edit": "編輯",
+		"file": "檔案",
+		"fullscreen": "切換全螢幕",
+		"help": "輔助說明",
+		"hide": "隱藏 {appName}",
+		"hideOthers": "隱藏其他",
+		"minimize": "縮到最小",
+		"paste": "貼上",
+		"quit": "結束 {appName}",
+		"redo": "重做",
+		"selectAll": "全選",
+		"services": "服務",
+		"undo": "還原",
+		"view": "顯示方式",
+		"window": "視窗",
+		"zoom": "縮放"
+	},
 	"name": "",
 	"newPlaylist": {
 		"buttonLabel": "新增歌單",
