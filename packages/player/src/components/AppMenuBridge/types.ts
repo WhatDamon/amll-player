@@ -1,8 +1,27 @@
-/** 点击 macOS 应用菜单里的「关于」时，Tauri 侧发给主窗口的事件名。 */
-export const ABOUT_MENU_EVENT = "app-menu:about";
+/** 点击自定义应用菜单项时，Tauri 侧发给主窗口的事件名；负载为菜单项 id。 */
+export const MENU_ACTION_EVENT = "app-menu:action";
 
-/** 点击 macOS 应用菜单里的「设置」时，Tauri 侧发给主窗口的事件名。 */
-export const SETTINGS_MENU_EVENT = "app-menu:settings";
+/**
+ * 自定义菜单项的 id，需与 Tauri 侧 `src-tauri/src/app_menu.rs` 中的 id 保持一致。
+ *
+ * Tauri 侧只转发带 `amll.` 前缀的菜单项，其余系统预定义项由 AppKit 自行处理。
+ */
+export const MENU_ACTION_IDS = {
+	about: "amll.about",
+	settings: "amll.settings",
+	checkUpdate: "amll.check-update",
+	playPause: "amll.play-pause",
+	prevSong: "amll.prev-song",
+	nextSong: "amll.next-song",
+	cycleRepeat: "amll.cycle-repeat",
+	toggleShuffle: "amll.toggle-shuffle",
+	githubRepo: "amll.github-repo",
+	reportIssue: "amll.report-issue",
+} as const;
+
+/** 帮助菜单里的外部链接。 */
+export const GITHUB_REPO_URL = "https://github.com/amll-dev/amll-player";
+export const REPORT_ISSUE_URL = `${GITHUB_REPO_URL}/issues`;
 
 /**
  * macOS 应用菜单的文案，缺省字段由 Tauri 侧回退到英文。
@@ -11,22 +30,32 @@ export const SETTINGS_MENU_EVENT = "app-menu:settings";
  */
 export interface MenuLabels {
 	about?: string;
+	checkUpdate?: string;
 	closeWindow?: string;
 	copy?: string;
 	cut?: string;
+	cycleRepeat?: string;
 	edit?: string;
 	file?: string;
 	fullscreen?: string;
+	githubRepo?: string;
 	help?: string;
 	hide?: string;
 	hideOthers?: string;
 	minimize?: string;
+	nextSong?: string;
 	paste?: string;
+	playback?: string;
+	playPause?: string;
+	prevSong?: string;
 	quit?: string;
 	redo?: string;
+	reportIssue?: string;
 	selectAll?: string;
 	services?: string;
 	settings?: string;
+	showAll?: string;
+	toggleShuffle?: string;
 	undo?: string;
 	view?: string;
 	window?: string;
