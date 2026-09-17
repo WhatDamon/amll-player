@@ -194,10 +194,6 @@ export const Component: FC = () => {
 		const btnContainer = buttonContainerRef.current;
 
 		if (titlebar && btnContainer) {
-			// 这段逻辑维护一条隐性不变量：把标题栏拖拽层的 left 推到胶囊容器右侧。
-			// #system-titlebar 覆盖 0–32px 整条带并带 data-tauri-drag-region，
-			// 若它盖住胶囊，胶囊会点不动、双击会最大化窗口。
-			// 删除这段会造成上述回归；契约说明见 public/titlebar.css 顶部。
 			const observer = new ResizeObserver(() => {
 				const width = btnContainer.getBoundingClientRect().width;
 

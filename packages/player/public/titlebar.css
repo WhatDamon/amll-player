@@ -1,17 +1,5 @@
-/*
- * 契约 R1：任何需要点击的 UI 必须完全位于 y >= var(--system-titlebar-height, 0px)。
- *
- * 原因（三条都不能省）：
- * 1. #system-titlebar 是 position: fixed / top: 0 / height: 32px / z-index: 10000，
- *    覆盖在所有页面内容之上（例如设置页覆盖层 z-index 为 1000），并带有 data-tauri-drag-region。
- * 2. Tauri 的 drag.js 判定：命中目标是 button/a 等可点击元素且自身无该属性时不拖窗；
- *    命中目标自身带该属性且是 composedPath[0] 时拖窗。因此被这条带覆盖的元素点击不到，
- *    且 mousedown 会变成拖窗、双击会最大化窗口。
- * 3. macOS 上这条带内还叠着 AppKit 原生红绿灯，其命中测试优先于 webview：
- *    点在被它覆盖的位置会命中关闭 / 最小化按钮。
- *
- * 变量 --system-titlebar-height 由 titlebar.js 写入 body，是唯一状态源。
- */
+/* 此带内点击不会命中元素而是拖窗（双击最大化），macOS 上还会先命中 AppKit 原生红绿灯。
+   可点击 UI 必须完全位于 y >= var(--system-titlebar-height, 0px) 之下。 */
 
 #system-titlebar {
 	z-index: 10000;
@@ -26,10 +14,6 @@
 	color: white;
 }
 
-/* 主窗口打开歌词页时（AMLLWrapper 设置 body[data-amll-lyrics-open]），
-			   标题栏文字强制白色：歌词封面不受 prefers-color-scheme 影响。
-			   这条规则原先只写在 screenshot.html 里，而设置该属性的是主窗口，
-			   等于放错了窗口——并入本共享文件才让它真正生效。 */
 body[data-amll-lyrics-open] #system-titlebar {
 	color: white;
 }

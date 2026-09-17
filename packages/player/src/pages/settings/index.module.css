@@ -38,7 +38,6 @@
 	width: 240px;
 	flex-shrink: 0;
 	overflow-y: auto;
-	/* 胶囊只落在本列上方（见下方 .overlay 注释），因此只需本列为它让位 */
 	padding-top: var(--settings-pill-height);
 }
 
@@ -47,22 +46,10 @@
 	min-width: 0;
 	overflow-y: auto;
 	min-height: 0;
-	/* 本列不在胶囊的 x 范围内，这里的留白只为与侧栏首项对齐 */
 	padding-top: var(--settings-pill-height);
 }
 
-/* 契约 R1 的消费方：详述见 packages/player/public/titlebar.css 顶部注释。
-   胶囊行必须完全位于 #system-titlebar 的 0–32px 拖拽带之下，否则其上半截点不动
-   （mousedown 变成拖窗、双击变成最大化窗口），且 macOS 上会被 AppKit 原生红绿灯
-   覆盖（原生按钮的命中测试优先于 webview）。
-
-   但让位只需发生一次：胶囊的 x 范围恒在侧栏列内——侧栏固定 240px、容器左内边距
-   16px，内容列总从 x=272 起，而胶囊最宽约 88px。所以容器本身只要下移到保留带
-   下沿，让位交给侧栏列的 padding-top；窄屏侧栏隐藏后胶囊才真正压在内容列上方，
-   那时才把容器整体下移。 */
 .overlay {
-	/* Radix size-3 控件高度是 --space-7 = 40px，见 @radix-ui/themes 的
-	   .rt-BaseButton.rt-r-size-3 { --base-button-height: var(--space-7) } */
 	--settings-pill-height: var(--space-7);
 	--settings-header-top: max(
 		var(--system-titlebar-height, 0px),
@@ -103,8 +90,6 @@
 		text-align: center;
 	}
 
-	/* 侧栏隐藏后胶囊落在内容列上方 → 容器整体下移让位，内容列不再额外留白。
-	   本块必须排在 .overlay 基础规则之后，否则被源码顺序覆盖。 */
 	.overlay {
 		top: calc(var(--settings-header-top) + var(--settings-pill-height));
 	}

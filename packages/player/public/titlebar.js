@@ -24,9 +24,6 @@
 	};
 	let currentAppearance = localStorage.getItem("system-titlebar-appearance");
 
-	// 契约 R1 的唯一状态源：系统保留带高度。契约说明见 public/titlebar.css 顶部注释。
-	// Hidden（移动端等）时 #system-titlebar 为 display:none，clientHeight 自然为 0，无需特判。
-	// titlebar.css 在 <head> 中先于本脚本应用，因此这里的实测值可靠。
 	const updateTitlebarVariable = () => {
 		document.body.style.setProperty(
 			"--system-titlebar-height",
@@ -34,8 +31,6 @@
 		);
 	};
 
-	// 观察目标必须是 #system-titlebar 本体：唯一发布的变量取自它的高度，
-	// 而按钮容器在 macOS 上是 display: none，观察它永远不会触发。
 	const titlebarObz = new ResizeObserver(updateTitlebarVariable);
 	titlebarObz.observe(titlebar);
 
