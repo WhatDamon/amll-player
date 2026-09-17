@@ -1,7 +1,6 @@
 "use-strict";
 {
 	const titlebar = document.getElementById("system-titlebar");
-	const buttons = document.getElementById("system-titlebar-buttons");
 	const closeBtn = document.getElementById("system-titlebar-close");
 	const minimizeBtn = document.getElementById("system-titlebar-minimize");
 	const resizeBtn = document.getElementById("system-titlebar-resize");
@@ -25,40 +24,20 @@
 	};
 	let currentAppearance = localStorage.getItem("system-titlebar-appearance");
 
+	// 契约 R1 的唯一状态源：系统保留带高度。契约说明见 public/titlebar.css 顶部注释。
+	// Hidden（移动端等）时 #system-titlebar 为 display:none，clientHeight 自然为 0，无需特判。
+	// titlebar.css 在 <head> 中先于本脚本应用，因此这里的实测值可靠。
 	const updateTitlebarVariable = () => {
-		if (currentAppearance === SystemTitlebarAppearance.Windows) {
-			titlebar.classList.add("windows");
-			document.body.style.setProperty(
-				"--system-titlebar-height",
-				`${titlebar.clientHeight}px`,
-			);
-			document.body.style.setProperty(
-				"--system-titlebar-safe-padding-left",
-				"0px",
-			);
-			document.body.style.setProperty(
-				"--system-titlebar-safe-padding-right",
-				`${buttons.clientHeight}px`,
-			);
-		} else if (currentAppearance === SystemTitlebarAppearance.MacOS) {
-			titlebar.classList.add("mac-os");
-			document.body.style.setProperty(
-				"--system-titlebar-height",
-				`${titlebar.clientHeight}px`,
-			);
-			document.body.style.setProperty(
-				"--system-titlebar-safe-padding-left",
-				`${buttons.clientHeight}px`,
-			);
-			document.body.style.setProperty(
-				"--system-titlebar-safe-padding-right",
-				"0px",
-			);
-		}
+		document.body.style.setProperty(
+			"--system-titlebar-height",
+			`${titlebar.clientHeight}px`,
+		);
 	};
 
-	const buttonsObz = new ResizeObserver(updateTitlebarVariable);
-	buttonsObz.observe(buttons);
+	// 观察目标必须是 #system-titlebar 本体：唯一发布的变量取自它的高度，
+	// 而按钮容器在 macOS 上是 display: none，观察它永远不会触发。
+	const titlebarObz = new ResizeObserver(updateTitlebarVariable);
+	titlebarObz.observe(titlebar);
 
 	window.setSystemTitlebarAppearance = function setSystemTitlebarAppearance(
 		appearance,
