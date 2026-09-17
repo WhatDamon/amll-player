@@ -324,10 +324,7 @@ export const Component: FC = () => {
 				<Box className={styles.sidebarDesktop}>
 					<SidebarContent onNavigate={handleNavigate} />
 				</Box>
-				<Box className={styles.contentArea}>
-					<div style={{ height: "var(--space-4)" }} />
-					{renderContent()}
-				</Box>
+				<Box className={styles.contentArea}>{renderContent()}</Box>
 			</Flex>
 		</div>
 	);
