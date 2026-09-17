@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<link rel="icon" type="image/svg+xml" href="/vite.svg">
+		<link rel="stylesheet" href="/titlebar.css" />
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
@@ -91,125 +92,6 @@
 					</svg>
 				</button>
 			</div>
-			<style scoped>
-			body[data-amll-lyrics-open] #system-titlebar {
-				color: white;
-			}
-
-			#system-titlebar {
-				z-index: 10000;
-				display: flex;
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 32px;
-				flex-direction: row;
-				/* 因为有可能是移动设备，默认隐藏标题栏 */
-				display: none;
-				color: black;
-			}
-
-			@media (prefers-color-scheme: dark) {
-				#system-titlebar {
-					color: white;
-				}
-			}
-
-			#system-titlebar.fullscreen {
-				display: none !important;
-			}
-
-			#system-titlebar-buttons {
-				display: flex;
-				gap: 2px;
-			}
-
-			#system-titlebar.immersive {
-				transition: opacity 0.5s;
-				opacity: 0;
-			}
-
-			#system-titlebar.immersive:hover {
-				opacity: 1;
-			}
-
-			.system-button {
-				border: none;
-				background: transparent;
-			}
-
-			.system-button > svg {
-				display: none;
-			}
-
-			#system-titlebar.windows {
-				height: 32px;
-			}
-
-			#system-titlebar.mac-os {
-				display: flex;
-				height: 32px;
-			}
-
-			#system-titlebar.mac-os > * {
-				display: none;
-			}
-
-			#system-titlebar.windows .system-button {
-				transition:
-					background-color 0.25s,
-					color 0.25s;
-				transform: translateY(-0.5px);
-			}
-
-			#system-titlebar.windows .system-button:hover {
-				transition:
-					background-color 0.15s,
-					color 0.15s;
-			}
-
-			#system-titlebar.windows .system-button:hover {
-				background-color: rgba(255, 255, 255, 0.0605);
-				color: white;
-			}
-
-			#system-titlebar.windows .system-button:active {
-				background-color: rgba(255, 255, 255, 0.0419);
-			}
-
-			#system-titlebar.windows #system-titlebar-close:hover {
-				background-color: rgb(196, 43, 28);
-			}
-
-			#system-titlebar.windows #system-titlebar-close:active {
-				background-color: rgba(196, 43, 28, 0.9);
-			}
-
-			.system-button > svg:not(.maximize, .restore) {
-				display: block;
-			}
-
-			#system-titlebar-resize.maximize > svg.maximize {
-				display: block;
-			}
-
-			#system-titlebar-resize.restore > svg.restore {
-				display: block;
-			}
-
-			#system-titlebar.windows {
-				justify-content: flex-end;
-				display: flex;
-			}
-
-			#system-titlebar.windows .system-button {
-				width: 46px;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-			</style>
 			<script>
 			"use-strict";
 			{
