@@ -92,3 +92,32 @@
 		transform: translateX(0);
 	}
 }
+
+/* 契约 R1 的消费方：详述见 packages/player/public/titlebar.css 顶部注释。
+   胶囊行必须完全位于 #system-titlebar 的 0–32px 拖拽带之下，否则其上半截点不动
+   （mousedown 变成拖窗、双击变成最大化窗口），且 macOS 上会被 AppKit 原生红绿灯
+   覆盖（原生按钮的命中测试优先于 webview）。 */
+.overlay {
+	--settings-pill-height: 32px; /* = Radix size-3 按钮高度 */
+	--settings-header-top: max(
+		var(--system-titlebar-height, 0px),
+		var(--space-4)
+	);
+
+	position: fixed;
+	top: calc(var(--settings-header-top) + var(--settings-pill-height));
+	left: 0;
+	right: 0;
+	bottom: 80px;
+	z-index: 1000;
+}
+
+.pillRow {
+	position: fixed;
+	top: var(--settings-header-top);
+	left: 0;
+	height: var(--settings-pill-height);
+	padding-left: var(--space-4);
+	padding-right: var(--space-4);
+	z-index: 10;
+}

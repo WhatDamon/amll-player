@@ -194,6 +194,10 @@ export const Component: FC = () => {
 		const btnContainer = buttonContainerRef.current;
 
 		if (titlebar && btnContainer) {
+			// 这段逻辑维护一条隐性不变量：把标题栏拖拽层的 left 推到胶囊容器右侧。
+			// #system-titlebar 覆盖 0–32px 整条带并带 data-tauri-drag-region，
+			// 若它盖住胶囊，胶囊会点不动、双击会最大化窗口。
+			// 删除这段会造成上述回归；契约说明见 public/titlebar.css 顶部。
 			const observer = new ResizeObserver(() => {
 				const width = btnContainer.getBoundingClientRect().width;
 
@@ -266,16 +270,7 @@ export const Component: FC = () => {
 	};
 
 	return (
-		<div
-			style={{
-				position: "fixed",
-				top: "var(--space-8)",
-				left: 0,
-				right: 0,
-				bottom: "80px",
-				zIndex: 1000,
-			}}
-		>
+		<div className={styles.overlay} data-settings-overlay="">
 			<style>{`
 				.rt-Button[data-state='inactive'] {
 					background-color: transparent !important;
@@ -299,15 +294,8 @@ export const Component: FC = () => {
 				ref={buttonContainerRef}
 				align="center"
 				gap="3"
-				style={{
-					position: "fixed",
-					top: "var(--space-4)",
-					left: 0,
-					height: "var(--system-titlebar-height)",
-					paddingLeft: "var(--space-4)",
-					paddingRight: "var(--space-4)",
-					zIndex: 10,
-				}}
+				className={styles.pillRow}
+				data-pill-row=""
 			>
 				<Tooltip content={t("common.page.back", "返回")}>
 					<Button variant="soft" onClick={() => history.back()} size="3">
