@@ -52,9 +52,9 @@ export const Component: FC = () => {
 							{updateInfo && (
 								<Badge
 									onClick={() => {
-										// 更新区块在设置页的「关于」标签里，之前只跳了 /settings 而没有切标签
+										// 更新区块在设置页的「关于」标签里，用 hash 指定落点
 										setSettingsPage("player.about");
-										router.navigate("/settings");
+										router.navigate("/settings#updater");
 									}}
 									radius="full"
 									style={{

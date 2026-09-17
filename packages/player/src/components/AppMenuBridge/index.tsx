@@ -85,24 +85,34 @@ export const AppMenuBridge: FC = () => {
 	useEffect(() => {
 		if (!isMacos()) return;
 
-		/** 跳到应用内设置页；`page` 缺省时保留上次停留的标签，与侧边栏入口行为一致。 */
-		const openSettings = (page?: string) => {
+		/**
+		 * 跳到应用内设置页。
+		 *
+		 * `page` 缺省时保留上次停留的标签（与侧边栏入口行为一致），`anchor` 为 URL hash
+		 * 锚点（`about` / `updater`），由设置页负责把落点滚到对应位置。
+		 */
+		const openSettings = (page?: string, anchor?: string) => {
 			if (page) store.set(settingsPageAtom, page);
 			// 歌词页是全屏遮罩，不先关掉就会盖住要跳转的设置页
 			store.set(isLyricPageOpenedAtom, false);
-			// 已经在设置页时不再压入历史记录，否则关闭设置页要按很多次返回键
-			if (router.state.location.pathname !== "/settings") {
-				router.navigate("/settings").catch(console.error);
-			}
+
+			const target = anchor ? `/settings#${anchor}` : "/settings";
+			const current = `${router.state.location.pathname}${router.state.location.hash}`;
+			// 目标与当前地址一致时用 replace 再导航一次，好让设置页重新对齐落点
+			// （比如滚下去之后又点了一次「关于」），同时不往历史记录里堆条目。
+			router
+				.navigate(target, current === target ? { replace: true } : undefined)
+				.catch(console.error);
 		};
 
 		// 播放类动作由当前音乐上下文注册，未注册时 onEmit 为空（此时本来也没有可控制的内容），
 		// 所以回调都在点击时现取，避免把过期的上下文闭包留在监听器里。
 		const handlers: Record<string, () => void> = {
-			[MENU_ACTION_IDS.about]: () => openSettings("player.about"),
+			[MENU_ACTION_IDS.about]: () => openSettings("player.about", "about"),
 			[MENU_ACTION_IDS.settings]: () => openSettings(),
 			[MENU_ACTION_IDS.checkUpdate]: () => {
-				openSettings("player.about");
+				openSettings("player.about", "updater");
+				// 更新信息到得比滚动晚，设置页会在区块出现时再对齐一次
 				store.set(checkUpdateAtom);
 			},
 			[MENU_ACTION_IDS.playPause]: () =>
