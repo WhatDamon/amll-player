@@ -5,7 +5,7 @@ use tauri::{
         HELP_SUBMENU_ID, Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu, WINDOW_SUBMENU_ID,
     },
 };
-use tracing::warn;
+use tracing::{info, warn};
 
 /// Prefix of the menu item ids that are forwarded to the frontend.
 const MENU_ID_PREFIX: &str = "amll.";
@@ -288,6 +288,7 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
 /// the application language changes.
 #[tauri::command]
 pub fn update_app_menu(app: AppHandle, labels: MenuLabels) -> Result<(), String> {
+    info!("应用菜单已按当前语言重建");
     let menu = create_menu(&app, &labels).map_err(|err| err.to_string())?;
     app.set_menu(menu).map_err(|err| err.to_string())?;
     Ok(())
