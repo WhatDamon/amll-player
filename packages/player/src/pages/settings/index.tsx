@@ -238,10 +238,9 @@ export const Component: FC = () => {
 	};
 
 	// 设置页支持用 URL hash 指定落点（#about 回到内容顶部、#updater 滚到更新区块）。
-	// 目标元素往往晚到（贡献者列表是异步拉取的，更新区块要等检查结果），而它们一到
-	// 就会把落点顶走（这正是「跳到更新区块却停在贡献者列表」的原因），所以在内容
-	// 稳定前每次 DOM 变化都重新对齐一次；用户一旦自己滚动、或超过等待上限（网络
-	// 很慢时不再强行对齐），就交出控制权。
+	// 目标元素往往晚到（贡献者列表是异步拉取的、更新区块要等检查结果），而它们一到就会
+	// 把落点顶走，所以在内容稳定前每次 DOM 变化都重新对齐一次；用户自己滚动、或超过
+	// 等待上限（网络很慢时不再强行对齐）就交出控制权。
 	useEffect(() => {
 		const container = contentAreaRef.current;
 		if (!container) return;
@@ -252,7 +251,7 @@ export const Component: FC = () => {
 		let frame = 0;
 		let stopped = false;
 
-		// 找不到对应元素时退回内容顶部（例如没有可用更新时的 #updater）
+		// 没有对应元素时退回内容顶部（例如没有可用更新时的 #updater）
 		const align = () => {
 			frame = 0;
 			if (stopped) return;

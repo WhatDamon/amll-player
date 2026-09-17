@@ -209,7 +209,8 @@ pub fn run() {
     #[cfg(target_os = "macos")]
     let builder = builder.plugin(tauri_plugin_macos_fps::init());
 
-    // macOS 默认菜单的「关于」会弹出原生面板，替换为自定义菜单以便路由到应用内界面
+    // Tauri's default macOS menu opens the native About panel; install a custom menu so the
+    // About item can be routed to the in-app settings page instead.
     #[cfg(target_os = "macos")]
     let builder = builder
         .menu(|app| app_menu::create_menu(app, &app_menu::MenuLabels::default()))

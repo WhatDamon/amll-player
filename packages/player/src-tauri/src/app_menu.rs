@@ -1,13 +1,3 @@
-//! macOS 应用菜单。
-//!
-//! macOS 上 Tauri 会自动创建一份默认菜单，其中的「关于」项由 muda 直接调用
-//! `orderFrontStandardAboutPanel` 弹出原生关于面板，不会产生菜单事件，前端无法接管。
-//! 因此这里显式构建一份菜单，把需要接管的项（关于/设置/检查更新/播放控制/帮助）
-//! 做成普通菜单项，由前端路由到应用内的对应界面或动作。
-//!
-//! 菜单文案由前端随应用语言同步过来（见 [`update_app_menu`] 命令），
-//! 尚未同步前回退到英文。
-
 use serde::Deserialize;
 use tauri::{
     AppHandle, Emitter, Manager, Runtime,
@@ -17,17 +7,16 @@ use tauri::{
 };
 use tracing::warn;
 
-/// 自定义菜单项 id 的前缀，只有带此前缀的菜单项会被转发给前端。
+/// Prefix of the menu item ids that are forwarded to the frontend.
 const MENU_ID_PREFIX: &str = "amll.";
 
-/// 菜单项被点击后广播给前端的应用内事件名，负载为菜单项 id。
-///
-/// 自定义菜单项的 id 需与前端 `MENU_ACTION_IDS` 保持一致。
+/// Emitted to the frontend when one of those items is clicked; the payload is the
+/// menu item id, which has to match `MENU_ACTION_IDS` on the frontend side.
 pub const MENU_ACTION_EVENT: &str = "app-menu:action";
 
-/// macOS 应用菜单的文案，字段缺省时回退到英文。
+/// Labels of the macOS application menu; missing fields fall back to English.
 ///
-/// 文案中的 `{appName}` 会被替换为应用名称。
+/// `{appName}` inside a label is replaced with the application name.
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct MenuLabels {
@@ -64,15 +53,22 @@ pub struct MenuLabels {
     pub report_issue: Option<String>,
 }
 
-/// 取用文案模板，缺省时回退到英文文案，并填入应用名称。
+/// Fills the application name into a label template, falling back to English.
 fn label(template: Option<&str>, fallback: &str, app_name: &str) -> String {
     template.unwrap_or(fallback).replace("{appName}", app_name)
 }
 
-/// 构建 macOS 应用菜单。
+/// Builds the macOS application menu.
 ///
-/// 结构与 Tauri 的 `Menu::default()` 保持一致（App / 文件 / 编辑 / 显示 / 窗口 / 帮助），
-/// 只有「关于」是自定义菜单项，其余继续使用系统预定义项以保留原生的快捷键与行为。
+/// The structure mirrors Tauri's `Menu::default()` (App / File / Edit / View / Window /
+/// Help), but every item that needs to reach the app is a plain menu item that emits
+/// `MENU_ACTION_EVENT` instead of running a native selector. About has to be one of them:
+/// muda's predefined About calls `orderFrontStandardAboutPanel` and never reports a menu
+/// event, so it cannot be intercepted. All other items stay predefined to keep the native
+/// accelerators and behaviour.
+///
+/// Labels are synced from the frontend (see `update_app_menu`) and fall back to English
+/// until the first sync.
 pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri::Result<Menu<R>> {
     let app_name = app.package_info().name.clone();
     let l = |template: Option<&str>, fallback: &str| label(template, fallback, &app_name);
@@ -85,7 +81,7 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         None::<&str>,
     )?;
 
-    // macOS 惯例：「设置」紧跟在「关于」下方，快捷键 ⌘,
+    // macOS convention: Settings… sits right below About, with ⌘,
     let settings = MenuItem::with_id(
         app,
         "amll.settings",
@@ -94,7 +90,7 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         Some("Cmd+,"),
     )?;
 
-    // 与「关于」「设置」同属应用级条目，跟在「设置」下方
+    // Application-level item, grouped with About and Settings
     let check_update = MenuItem::with_id(
         app,
         "amll.check-update",
@@ -164,8 +160,9 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         )?],
     )?;
 
-    // 「播放」菜单：动作全部交给前端，这里刻意不给快捷键，
-    // 避免与 ShotcutContext 已注册的系统级全局快捷键（⌥⌘P / ⌥⌘← / ⌥⌘→）抢同一个键
+    // Playback actions are dispatched to the frontend, so no accelerators here on purpose:
+    // ShotcutContext already registers system-wide global shortcuts (⌥⌘P / ⌥⌘← / ⌥⌘→)
+    // and AppKit key equivalents would fight over the same keys.
     let playback_submenu = Submenu::with_items(
         app,
         l(labels.playback.as_deref(), "Playback"),
@@ -210,8 +207,8 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         ],
     )?;
 
-    // 「窗口」与「帮助」菜单必须使用 Tauri 约定的 id，
-    // 否则 `init_app_menu` 不会把它们注册给 AppKit（窗口列表、帮助搜索栏会失效）
+    // These two submenus have to keep Tauri's reserved ids, otherwise `init_app_menu` does
+    // not hand them to AppKit and the window list / Help search field disappear.
     let window_submenu = Submenu::with_id_and_items(
         app,
         WINDOW_SUBMENU_ID,
@@ -229,7 +226,8 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         ],
     )?;
 
-    // macOS 的「帮助」菜单内容为空，搜索栏由系统补上；这里放项目相关的外部链接
+    // On macOS the Help menu starts out empty and the system adds the search field,
+    // so it is used for the project links.
     let help_submenu = Submenu::with_id_and_items(
         app,
         HELP_SUBMENU_ID,
@@ -267,14 +265,15 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
     )
 }
 
-/// 处理菜单点击事件，把带 [`MENU_ID_PREFIX`] 前缀的菜单项转发给前端。
+/// Handles menu clicks and forwards the custom items to the frontend.
 pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
     let id = event.id().as_ref();
     if !id.starts_with(MENU_ID_PREFIX) {
         return;
     }
 
-    // 菜单有可能在窗口被最小化或隐藏时被点击，先把主窗口带回前台
+    // The menu can be clicked while the main window is hidden or minimised, so bring it
+    // back to the front first.
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
         let _ = window.set_focus();
@@ -285,7 +284,8 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
     }
 }
 
-/// 按前端传入的文案重建应用菜单，随应用语言变化调用。
+/// Rebuilds the application menu with the labels supplied by the frontend, called whenever
+/// the application language changes.
 #[tauri::command]
 pub fn update_app_menu(app: AppHandle, labels: MenuLabels) -> Result<(), String> {
     let menu = create_menu(&app, &labels).map_err(|err| err.to_string())?;

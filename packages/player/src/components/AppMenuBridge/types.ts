@@ -23,11 +23,7 @@ export const MENU_ACTION_IDS = {
 export const GITHUB_REPO_URL = "https://github.com/amll-dev/amll-player";
 export const REPORT_ISSUE_URL = `${GITHUB_REPO_URL}/issues`;
 
-/**
- * macOS 应用菜单的文案，缺省字段由 Tauri 侧回退到英文。
- *
- * 文案中的 `{appName}` 为应用名称占位符。
- */
+/** macOS 应用菜单的文案，缺省字段由 Tauri 侧回退到英文；`{appName}` 为应用名称占位符。 */
 export interface MenuLabels {
 	about?: string;
 	checkUpdate?: string;
