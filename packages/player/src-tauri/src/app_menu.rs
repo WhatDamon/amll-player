@@ -94,7 +94,7 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         Some("Cmd+,"),
     )?;
 
-    // Sparkle 系应用惯例：「检查更新…」放在退出上方
+    // 与「关于」「设置」同属应用级条目，跟在「设置」下方
     let check_update = MenuItem::with_id(
         app,
         "amll.check-update",
@@ -111,6 +111,7 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
             &about,
             &PredefinedMenuItem::separator(app)?,
             &settings,
+            &check_update,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::services(app, Some(&l(labels.services.as_deref(), "Services")))?,
             &PredefinedMenuItem::separator(app)?,
@@ -120,8 +121,6 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
                 Some(&l(labels.hide_others.as_deref(), "Hide Others")),
             )?,
             &PredefinedMenuItem::show_all(app, Some(&l(labels.show_all.as_deref(), "Show All")))?,
-            &PredefinedMenuItem::separator(app)?,
-            &check_update,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::quit(app, Some(&l(labels.quit.as_deref(), "Quit {appName}")))?,
         ],
