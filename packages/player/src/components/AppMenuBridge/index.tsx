@@ -28,14 +28,10 @@ import {
 /** 应用菜单只由 macOS 上的 Tauri 侧创建。 */
 const isMacos = () => platform() === "macos";
 
-/** 应用名称在运行期不会变化，缓存一次即可。 */
-let appNamePromise: Promise<string> | undefined;
-const getAppName = () => (appNamePromise ??= getName());
-
 /** 按当前语言收集菜单文案并同步给 Tauri 侧，未同步前菜单显示英文。 */
 const syncMenuLabels = async () => {
 	try {
-		const appName = await getAppName();
+		const appName = await getName();
 		const labels: MenuLabels = {
 			about: i18n.t("menu.about", { appName }),
 			checkUpdate: i18n.t("menu.checkUpdate"),
@@ -75,10 +71,7 @@ const syncMenuLabels = async () => {
 	}
 };
 
-/**
- * 打通 macOS 应用菜单与前端界面：
- * 菜单文案跟随应用语言，被接管的菜单项按 id 分派到应用内的对应界面或动作。
- */
+/** 把 macOS 应用菜单接到前端：文案跟随语言，被接管的菜单项按 id 分派到界面或动作。 */
 export const AppMenuBridge: FC = () => {
 	const store = useStore();
 
@@ -86,10 +79,8 @@ export const AppMenuBridge: FC = () => {
 		if (!isMacos()) return;
 
 		/**
-		 * 跳到应用内设置页。
-		 *
-		 * `anchor` 是 URL hash 锚点（`about` / `updater`），由设置页把落点滚到对应位置；
-		 * `page` 缺省时保留上次停留的标签，与侧边栏入口行为一致。
+		 * 跳到应用内设置页；`anchor` 是 URL hash 锚点（`about` / `updater`），
+		 * `page` 缺省时保留上次停留的标签，与侧边栏入口一致。
 		 */
 		const openSettings = (page?: string, anchor?: string) => {
 			if (page) store.set(settingsPageAtom, page);
@@ -147,9 +138,7 @@ export const AppMenuBridge: FC = () => {
 		});
 
 		return () => {
-			unlisten
-				.then((off) => off())
-				.catch((err) => console.error("取消监听应用菜单事件失败:", err));
+			unlisten.then((off) => off());
 		};
 	}, [store]);
 

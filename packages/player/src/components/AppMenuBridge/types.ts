@@ -2,9 +2,8 @@
 export const MENU_ACTION_EVENT = "app-menu:action";
 
 /**
- * 自定义菜单项的 id，需与 Tauri 侧 `src-tauri/src/app_menu.rs` 中的 id 保持一致。
- *
- * Tauri 侧只转发带 `amll.` 前缀的菜单项，其余系统预定义项由 AppKit 自行处理。
+ * 自定义菜单项的 id，与 Tauri 侧 `src-tauri/src/app_menu.rs` 保持一致
+ * （Tauri 只转发 `amll.` 前缀的菜单项）。
  */
 export const MENU_ACTION_IDS = {
 	about: "amll.about",

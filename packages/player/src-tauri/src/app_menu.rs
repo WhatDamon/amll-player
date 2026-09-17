@@ -12,12 +12,12 @@ const MENU_ID_PREFIX: &str = "amll.";
 
 /// Emitted to the frontend when one of those items is clicked; the payload is the
 /// menu item id, which has to match `MENU_ACTION_IDS` on the frontend side.
-pub const MENU_ACTION_EVENT: &str = "app-menu:action";
+const MENU_ACTION_EVENT: &str = "app-menu:action";
 
 /// Labels of the macOS application menu; missing fields fall back to English.
 ///
 /// `{appName}` inside a label is replaced with the application name.
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Default, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct MenuLabels {
     pub about: Option<String>,
@@ -53,11 +53,6 @@ pub struct MenuLabels {
     pub report_issue: Option<String>,
 }
 
-/// Fills the application name into a label template, falling back to English.
-fn label(template: Option<&str>, fallback: &str, app_name: &str) -> String {
-    template.unwrap_or(fallback).replace("{appName}", app_name)
-}
-
 /// Builds the macOS application menu.
 ///
 /// The structure mirrors Tauri's `Menu::default()` (App / File / Edit / View / Window /
@@ -71,30 +66,33 @@ fn label(template: Option<&str>, fallback: &str, app_name: &str) -> String {
 /// until the first sync.
 pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri::Result<Menu<R>> {
     let app_name = app.package_info().name.clone();
-    let l = |template: Option<&str>, fallback: &str| label(template, fallback, &app_name);
+    let label = |template: &Option<String>, fallback: &str| {
+        template
+            .as_deref()
+            .unwrap_or(fallback)
+            .replace("{appName}", &app_name)
+    };
 
     let about = MenuItem::with_id(
         app,
         "amll.about",
-        l(labels.about.as_deref(), "About {appName}"),
+        label(&labels.about, "About {appName}"),
         true,
         None::<&str>,
     )?;
 
-    // macOS convention: Settings… sits right below About, with ⌘,
     let settings = MenuItem::with_id(
         app,
         "amll.settings",
-        l(labels.settings.as_deref(), "Settings…"),
+        label(&labels.settings, "Settings…"),
         true,
         Some("Cmd+,"),
     )?;
 
-    // Application-level item, grouped with About and Settings
     let check_update = MenuItem::with_id(
         app,
         "amll.check-update",
-        l(labels.check_update.as_deref(), "Check for Updates…"),
+        label(&labels.check_update, "Check for Updates…"),
         true,
         None::<&str>,
     )?;
@@ -109,54 +107,51 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
             &settings,
             &check_update,
             &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::services(app, Some(&l(labels.services.as_deref(), "Services")))?,
+            &PredefinedMenuItem::services(app, Some(&label(&labels.services, "Services")))?,
             &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::hide(app, Some(&l(labels.hide.as_deref(), "Hide {appName}")))?,
+            &PredefinedMenuItem::hide(app, Some(&label(&labels.hide, "Hide {appName}")))?,
             &PredefinedMenuItem::hide_others(
                 app,
-                Some(&l(labels.hide_others.as_deref(), "Hide Others")),
+                Some(&label(&labels.hide_others, "Hide Others")),
             )?,
-            &PredefinedMenuItem::show_all(app, Some(&l(labels.show_all.as_deref(), "Show All")))?,
+            &PredefinedMenuItem::show_all(app, Some(&label(&labels.show_all, "Show All")))?,
             &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::quit(app, Some(&l(labels.quit.as_deref(), "Quit {appName}")))?,
+            &PredefinedMenuItem::quit(app, Some(&label(&labels.quit, "Quit {appName}")))?,
         ],
     )?;
 
     let file_submenu = Submenu::with_items(
         app,
-        l(labels.file.as_deref(), "File"),
+        label(&labels.file, "File"),
         true,
         &[&PredefinedMenuItem::close_window(
             app,
-            Some(&l(labels.close_window.as_deref(), "Close Window")),
+            Some(&label(&labels.close_window, "Close Window")),
         )?],
     )?;
 
     let edit_submenu = Submenu::with_items(
         app,
-        l(labels.edit.as_deref(), "Edit"),
+        label(&labels.edit, "Edit"),
         true,
         &[
-            &PredefinedMenuItem::undo(app, Some(&l(labels.undo.as_deref(), "Undo")))?,
-            &PredefinedMenuItem::redo(app, Some(&l(labels.redo.as_deref(), "Redo")))?,
+            &PredefinedMenuItem::undo(app, Some(&label(&labels.undo, "Undo")))?,
+            &PredefinedMenuItem::redo(app, Some(&label(&labels.redo, "Redo")))?,
             &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::cut(app, Some(&l(labels.cut.as_deref(), "Cut")))?,
-            &PredefinedMenuItem::copy(app, Some(&l(labels.copy.as_deref(), "Copy")))?,
-            &PredefinedMenuItem::paste(app, Some(&l(labels.paste.as_deref(), "Paste")))?,
-            &PredefinedMenuItem::select_all(
-                app,
-                Some(&l(labels.select_all.as_deref(), "Select All")),
-            )?,
+            &PredefinedMenuItem::cut(app, Some(&label(&labels.cut, "Cut")))?,
+            &PredefinedMenuItem::copy(app, Some(&label(&labels.copy, "Copy")))?,
+            &PredefinedMenuItem::paste(app, Some(&label(&labels.paste, "Paste")))?,
+            &PredefinedMenuItem::select_all(app, Some(&label(&labels.select_all, "Select All")))?,
         ],
     )?;
 
     let view_submenu = Submenu::with_items(
         app,
-        l(labels.view.as_deref(), "View"),
+        label(&labels.view, "View"),
         true,
         &[&PredefinedMenuItem::fullscreen(
             app,
-            Some(&l(labels.fullscreen.as_deref(), "Toggle Full Screen")),
+            Some(&label(&labels.fullscreen, "Toggle Full Screen")),
         )?],
     )?;
 
@@ -165,27 +160,27 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
     // and AppKit key equivalents would fight over the same keys.
     let playback_submenu = Submenu::with_items(
         app,
-        l(labels.playback.as_deref(), "Playback"),
+        label(&labels.playback, "Playback"),
         true,
         &[
             &MenuItem::with_id(
                 app,
                 "amll.play-pause",
-                l(labels.play_pause.as_deref(), "Play/Pause"),
+                label(&labels.play_pause, "Play/Pause"),
                 true,
                 None::<&str>,
             )?,
             &MenuItem::with_id(
                 app,
                 "amll.prev-song",
-                l(labels.prev_song.as_deref(), "Previous Song"),
+                label(&labels.prev_song, "Previous Song"),
                 true,
                 None::<&str>,
             )?,
             &MenuItem::with_id(
                 app,
                 "amll.next-song",
-                l(labels.next_song.as_deref(), "Next Song"),
+                label(&labels.next_song, "Next Song"),
                 true,
                 None::<&str>,
             )?,
@@ -193,14 +188,14 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
             &MenuItem::with_id(
                 app,
                 "amll.cycle-repeat",
-                l(labels.cycle_repeat.as_deref(), "Repeat"),
+                label(&labels.cycle_repeat, "Repeat"),
                 true,
                 None::<&str>,
             )?,
             &MenuItem::with_id(
                 app,
                 "amll.toggle-shuffle",
-                l(labels.toggle_shuffle.as_deref(), "Shuffle"),
+                label(&labels.toggle_shuffle, "Shuffle"),
                 true,
                 None::<&str>,
             )?,
@@ -212,15 +207,15 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
     let window_submenu = Submenu::with_id_and_items(
         app,
         WINDOW_SUBMENU_ID,
-        l(labels.window.as_deref(), "Window"),
+        label(&labels.window, "Window"),
         true,
         &[
-            &PredefinedMenuItem::minimize(app, Some(&l(labels.minimize.as_deref(), "Minimize")))?,
-            &PredefinedMenuItem::maximize(app, Some(&l(labels.zoom.as_deref(), "Zoom")))?,
+            &PredefinedMenuItem::minimize(app, Some(&label(&labels.minimize, "Minimize")))?,
+            &PredefinedMenuItem::maximize(app, Some(&label(&labels.zoom, "Zoom")))?,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::close_window(
                 app,
-                Some(&l(labels.close_window.as_deref(), "Close Window")),
+                Some(&label(&labels.close_window, "Close Window")),
             )?,
             &PredefinedMenuItem::bring_all_to_front(app, None::<&str>)?,
         ],
@@ -231,20 +226,20 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
     let help_submenu = Submenu::with_id_and_items(
         app,
         HELP_SUBMENU_ID,
-        l(labels.help.as_deref(), "Help"),
+        label(&labels.help, "Help"),
         true,
         &[
             &MenuItem::with_id(
                 app,
                 "amll.github-repo",
-                l(labels.github_repo.as_deref(), "GitHub Repository"),
+                label(&labels.github_repo, "GitHub Repository"),
                 true,
                 None::<&str>,
             )?,
             &MenuItem::with_id(
                 app,
                 "amll.report-issue",
-                l(labels.report_issue.as_deref(), "Report an Issue"),
+                label(&labels.report_issue, "Report an Issue"),
                 true,
                 None::<&str>,
             )?,
@@ -288,7 +283,7 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
 /// the application language changes.
 #[tauri::command]
 pub fn update_app_menu(app: AppHandle, labels: MenuLabels) -> Result<(), String> {
-    info!("应用菜单已按当前语言重建");
+    info!("Rebuilt application menu for the current language");
     let menu = create_menu(&app, &labels).map_err(|err| err.to_string())?;
     app.set_menu(menu).map_err(|err| err.to_string())?;
     Ok(())
