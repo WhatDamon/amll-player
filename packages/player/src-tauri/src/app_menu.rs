@@ -2,8 +2,8 @@
 //!
 //! macOS 上 Tauri 会自动创建一份默认菜单，其中的「关于」项由 muda 直接调用
 //! `orderFrontStandardAboutPanel` 弹出原生关于面板，不会产生菜单事件，前端无法接管。
-//! 因此这里显式构建一份与默认菜单结构等价的菜单，只把「关于」换成普通菜单项，
-//! 由前端路由到应用内的关于界面。
+//! 因此这里显式构建一份与默认菜单结构等价的菜单，把「关于」「设置」换成普通菜单项，
+//! 由前端路由到应用内的对应界面。
 //!
 //! 菜单文案由前端随应用语言同步过来（见 [`update_app_menu`] 命令），
 //! 尚未同步前回退到英文。
@@ -24,6 +24,12 @@ pub const ABOUT_MENU_ID: &str = "amll.about";
 /// 「关于」被点击后广播给前端的应用内事件名。
 pub const ABOUT_MENU_EVENT: &str = "app-menu:about";
 
+/// 自定义「设置」菜单项的 id。
+pub const SETTINGS_MENU_ID: &str = "amll.settings";
+
+/// 「设置」被点击后广播给前端的应用内事件名。
+pub const SETTINGS_MENU_EVENT: &str = "app-menu:settings";
+
 /// macOS 应用菜单的文案，字段缺省时回退到英文。
 ///
 /// 文案中的 `{appName}` 会被替换为应用名称。
@@ -31,6 +37,7 @@ pub const ABOUT_MENU_EVENT: &str = "app-menu:about";
 #[serde(default, rename_all = "camelCase")]
 pub struct MenuLabels {
     pub about: Option<String>,
+    pub settings: Option<String>,
     pub services: Option<String>,
     pub hide: Option<String>,
     pub hide_others: Option<String>,
@@ -73,12 +80,23 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
         None::<&str>,
     )?;
 
+    // macOS 惯例：「设置」紧跟在「关于」下方，快捷键 ⌘,
+    let settings = MenuItem::with_id(
+        app,
+        SETTINGS_MENU_ID,
+        l(labels.settings.as_deref(), "Settings…"),
+        true,
+        Some("Cmd+,"),
+    )?;
+
     let app_submenu = Submenu::with_items(
         app,
         &app_name,
         true,
         &[
             &about,
+            &PredefinedMenuItem::separator(app)?,
+            &settings,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::services(app, Some(&l(labels.services.as_deref(), "Services")))?,
             &PredefinedMenuItem::separator(app)?,
@@ -170,11 +188,13 @@ pub fn create_menu<R: Runtime>(app: &AppHandle<R>, labels: &MenuLabels) -> tauri
     )
 }
 
-/// 处理菜单点击事件，把「关于」转发给前端。
+/// 处理菜单点击事件，把「关于」「设置」转发给前端。
 pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
-    if event.id() != ABOUT_MENU_ID {
-        return;
-    }
+    let event_name = match event.id().as_ref() {
+        ABOUT_MENU_ID => ABOUT_MENU_EVENT,
+        SETTINGS_MENU_ID => SETTINGS_MENU_EVENT,
+        _ => return,
+    };
 
     // 菜单有可能在窗口被最小化或隐藏时被点击，先把主窗口带回前台
     if let Some(window) = app.get_webview_window("main") {
@@ -182,7 +202,7 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
         let _ = window.set_focus();
     }
 
-    if let Err(err) = app.emit_to("main", ABOUT_MENU_EVENT, ()) {
+    if let Err(err) = app.emit_to("main", event_name, ()) {
         warn!("转发应用菜单事件失败: {err}");
     }
 }
